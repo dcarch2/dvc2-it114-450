@@ -15,14 +15,30 @@ public class Problem1 extends BaseClass {
         // Step 3: Add code to solve the problem (add/commit as needed)
         System.out.print("Output Array: ");
         // Start Solution Edits
+
+        // Step 1: Collect only odd values (loop through the array) dvc2 6/9/2025
+        // Step 2: Build string of odd numbers that is seperated by commas dvc2 6/9/2025
+        // Step 3: Print the final string dvc2 6/9/2025
         
+        StringBuilder odds = new StringBuilder();
+
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] % 2 != 0) {
+                if (odds.length() > 0) {
+                    odds.append(",");
+                }
+                odds.append(arr[i]);
+            }
+        }
+
+System.out.print(odds.toString());
 
         // End Solution Edits
         System.out.println("");
         System.out.println("______________________________________");
     }
     public static void main(String[] args) {
-        final String ucid = "mt85"; // <-- change to your UCID
+        final String ucid = "dvc2"; // <-- change to your UCID
         // no edits below this line
         printHeader(ucid, 1);
         printOdds(array1,1);
