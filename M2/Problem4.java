@@ -30,7 +30,29 @@ public class Problem4 extends BaseClass {
         
         for(int i = 0; i <arr.length; i++){
             // Start Solution Edits
-            
+            // Step 1: remove non-alphanumeric chars while keeping letters, digits, and spaces dvc2 6/9/2025
+            // Step 2: trim leading and trailing whitespace to collapse into multiple spaces dvc2 6/9/2025
+            // Step 3: capitalize first letter of each word dvc2 6/9/2025
+             String raw = arr[i];
+
+             raw = raw.replaceAll("[^a-zA-Z0-9 ]", "");
+
+             String[] words = raw.split(" ");
+             StringBuilder titleCase = new StringBuilder();
+             for (String word : words) {
+                if (!word.isEmpty()) {
+                    titleCase.append(Character.toUpperCase(word.charAt(0)));
+                    if (word.length() > 1) {
+                        titleCase.append(word.substring(1).toLowerCase());
+                    }
+                    titleCase.append(" ");
+                }
+            }
+
+            placeholderForModifiedPhrase = titleCase.toString().trim();
+            placeholderForMiddleCharacters = (placeholderForModifiedPhrase.length() > 1)
+                    ? placeholderForModifiedPhrase.substring(1, placeholderForModifiedPhrase.length() - 1)
+                    : "";
              // End Solution Edits
             System.out.println(String.format("Index[%d] \"%s\" | Middle: \"%s\"",i, placeholderForModifiedPhrase, placeholderForMiddleCharacters));
         }
@@ -42,7 +64,7 @@ public class Problem4 extends BaseClass {
     }
 
     public static void main(String[] args) {
-        final String ucid = "mt85"; // <-- change to your UCID
+        final String ucid = "dvc2"; // <-- change to your UCID
         // No edits below this line
         printHeader(ucid, 4);
 
