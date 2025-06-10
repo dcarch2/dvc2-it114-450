@@ -48,11 +48,15 @@ public class Problem4 extends BaseClass {
                     titleCase.append(" ");
                 }
             }
-
+        // Step 4 EC: Extract the middle 3 chars if its possible dvc2 6/9/2025
             placeholderForModifiedPhrase = titleCase.toString().trim();
-            placeholderForMiddleCharacters = (placeholderForModifiedPhrase.length() > 1)
-                    ? placeholderForModifiedPhrase.substring(1, placeholderForModifiedPhrase.length() - 1)
-                    : "";
+            if (placeholderForModifiedPhrase.length() >= 3) {
+                int mid = placeholderForModifiedPhrase.length() / 2;
+                int start = mid - 1;
+                placeholderForMiddleCharacters = placeholderForModifiedPhrase.substring(start, start + 3);
+            } else {
+                placeholderForMiddleCharacters = "Not enough characters";
+            }
              // End Solution Edits
             System.out.println(String.format("Index[%d] \"%s\" | Middle: \"%s\"",i, placeholderForModifiedPhrase, placeholderForMiddleCharacters));
         }
