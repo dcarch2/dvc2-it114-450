@@ -21,10 +21,15 @@ public class Problem2 extends BaseClass {
         double total = 0;
         // Start Solution Edits
         // Solve Challenge 1 here
+        // Step 1: Loop through the array to sum all the values into "total" dvc2 6/9/2025
+        for (double val : arr) {
+            total += val;
+        }
         
       
         // Solve Challenge 2 here
-        Object modifiedTotal = "?";
+        // Step 2: Formats the total to precisely 2 decimal places and assigns it to "modifiedTotal" dvc2 6/9/2025
+        String modifiedTotal = String.format("%.2f", total);
 
         // End Solution Edits
         System.out.println("Total Raw Value: " +total);
@@ -34,7 +39,7 @@ public class Problem2 extends BaseClass {
     }
 
     public static void main(String[] args) {
-        final String ucid = "mt85"; // <-- change to your UCID
+        final String ucid = "dvc2"; // <-- change to your UCID
         // no edits below this line
         printHeader(ucid, 2);
         sumValues(array1, 1);
