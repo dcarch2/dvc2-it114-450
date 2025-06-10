@@ -17,8 +17,28 @@ public class Problem3 extends BaseClass {
         // Step 3: Add code to solve the problem (add/commit as needed)
         Object[] output = new Object[arr.length];
         // Start Solution Edits
-        
-
+        // Step 1: loop through all of the elements in arr dvc2 6/9/2025
+        // Step 2: converts each value to the correct type, making it positive and storing in the output dvc2 6/9/2025
+        for (int i = 0; i < arr.length; i++) {
+            Object value = arr[i];
+            switch (arrayNumber) {
+                case 1: // Integer
+                    output[i] = Math.abs((Integer) value);
+                    break;
+                case 2: // Double
+                    output[i] = Math.abs((Double) value);
+                    break;
+                case 3: // Float
+                    output[i] = Math.abs((Float) value);
+                    break;
+                case 4: // String to Double
+                    output[i] = Math.abs(Double.parseDouble((String) value));
+                    break;
+                case 5: // Mixed Object -> String -> Double
+                    output[i] = Math.abs(Double.parseDouble(value.toString()));
+                    break;
+            }
+        }
         // End Solution Edits
         System.out.println("Output: ");
         printOutputWithType(output);
@@ -27,7 +47,7 @@ public class Problem3 extends BaseClass {
     }
 
     public static void main(String[] args) {
-        final String ucid = "mt85"; // <-- change to your UCID
+        final String ucid = "dvc2"; // <-- change to your UCID
         // no edits below this line
         printHeader(ucid, 3);
         bePositive(array1, 1);
