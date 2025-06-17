@@ -1,54 +1,69 @@
 package M3;
 
-/*
-Challenge 2: Simple Slash Command Handler
------------------------------------------
-- Accept user input as slash commands
-  - "/greet <name>" → Prints "Hello, <name>!"
-  - "/roll <num>d<sides>" → Roll <num> dice with <sides> and returns a single outcome as "Rolled <num>d<sides> and got <result>!"
-  - "/echo <message>" → Prints the message back
-  - "/quit" → Exits the program
-- Commands are case-insensitive
-- Print an error for unrecognized commands
-- Print errors for invalid command formats (when applicable)
-- Capture 3 variations of each command except "/quit"
-*/
-
 import java.util.Scanner;
+import java.util.Random;
+
+// DVC2 - 6/16/2025 - my code implements the slash-style command handler and accepts user input with specific commands like /greet, /roll, /echo, and /quit. It handles errors and outputs the proper user input with the commands.
 
 public class SlashCommandHandler extends BaseClass {
-    private static String ucid = "mt85"; // <-- change to your UCID
+    private static String ucid = "dvc2"; // <-- update with your UCID
 
     public static void main(String[] args) {
         printHeader(ucid, 2, "Objective: Implement a simple slash command parser.");
 
         Scanner scanner = new Scanner(System.in);
-
-        // Can define any variables needed here
+        Random rand = new Random();
 
         while (true) {
             System.out.print("Enter command: ");
-            // get entered text
+            String input = scanner.nextLine().trim();
 
-            // check if greet
-            //// process greet
-
-            // check if roll
-            //// process roll
-            //// handle invalid formats
-
-            // check if echo
-            //// process echo
-
-            // check if quit
-            //// process quit
-
-            // handle invalid commnads
-
-            // delete this condition/block, it's just here so the sample runs without edits
-            if (1 == 1) {
-                System.out.println("Breaking loop");
+            // Exit command
+            if (input.equalsIgnoreCase("/quit")) {
+                System.out.println("Exiting program...");
                 break;
+            }
+
+            // /greet <name>
+            else if (input.toLowerCase().startsWith("/greet ")) {
+                String name = input.substring(7).trim();
+                if (name.isEmpty()) {
+                    System.out.println("Error: Name is missing.");
+                } else {
+                    System.out.println("Hello, " + name + "!");
+                }
+            }
+
+            // /roll <num>d<sides>
+            else if (input.toLowerCase().startsWith("/roll ")) {
+                String[] parts = input.substring(6).split("d");
+                if (parts.length == 2) {
+                    try {
+                        int num = Integer.parseInt(parts[0].trim());
+                        int sides = Integer.parseInt(parts[1].trim());
+                        if (num <= 0 || sides <= 0) {
+                            System.out.println("Error: Numbers must be positive.");
+                        } else {
+                            int result = rand.nextInt(sides) + 1;
+                            System.out.println("Rolled " + num + "d" + sides + " and got " + result + "!");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Invalid number format.");
+                    }
+                } else {
+                    System.out.println("Error: Invalid /roll format. Use /roll <num>d<sides>");
+                }
+            }
+
+            // /echo <message>
+            else if (input.toLowerCase().startsWith("/echo ")) {
+                String message = input.substring(6).trim();
+                System.out.println(message);
+            }
+
+            // Unrecognized command
+            else {
+                System.out.println("Error: Unrecognized command.");
             }
         }
 
