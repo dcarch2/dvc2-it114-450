@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -21,6 +20,16 @@ public class Server {
     public void broadcast(String sender, String message) {
         for (ServerThread client : clients) {
             client.sendToClient(sender, message);
+        }
+    }
+
+    // added code for pm command part 2 dvc2 6/24/2025
+    public void sendPrivateMessage(String sender, String target, String msg) {
+        for (ServerThread client : clients) {
+            if (client.getUsername() != null &&
+                (client.getUsername().equals(sender) || client.getUsername().equals(target))) {
+                client.sendToClient("PM from " + sender, msg);
+            }
         }
     }
 

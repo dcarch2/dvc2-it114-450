@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -14,7 +13,7 @@ public class Client {
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
 
-        System.out.println("Connected to server. Type /flip to flip a coin or /quit to exit.");
+        System.out.println("Connected to server. Type /flip to flip a coin or /pm <user> <message> or /quit to exit.");
 
         new Thread(() -> {
             try {
@@ -32,9 +31,14 @@ public class Client {
             if (input.equals("/quit")) {
                 break;
             }
+
             // added code for flip command part 1 dvc2 6/23/2025
             if (input.equals("/flip")) {
                 out.println("CMD,flip");
+            }
+            // added code for pm command part 2 dvc2 6/24/2025
+            else if (input.startsWith("/pm ")) {
+                out.println("CMD," + input);
             } else {
                 out.println(input);
             }

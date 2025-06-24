@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 
@@ -20,6 +19,10 @@ public class ServerThread extends Thread {
         out.println(sender + ": " + msg);
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public void run() {
         try {
             out.println("Enter your username:");
@@ -31,10 +34,21 @@ public class ServerThread extends Thread {
                 if (input.startsWith("CMD,")) {
                     String[] parts = input.split(",", 2);
                     if (parts.length > 1) {
-                        String command = parts[1];
+                        String commandLine = parts[1];
                         // added code for flip command part 1 dvc2 6/23/2025
-                        if (command.equals("flip")) {
+                        if (commandLine.equals("flip")) {
                             server.handleCoinFlip(username);
+                        }
+                        // added code for pm command part 2 dvc2 6/24/2025
+                        else if (commandLine.startsWith("/pm ")) {
+                            String[] pmParts = commandLine.split(" ", 3);
+                            if (pmParts.length == 3) {
+                                String target = pmParts[1];
+                                String msg = pmParts[2];
+                                server.sendPrivateMessage(username, target, msg);
+                            } else {
+                                sendToClient("Server", "Usage: /pm <user> <message>");
+                            }
                         }
                     }
                 } else {
