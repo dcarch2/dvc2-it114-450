@@ -161,4 +161,48 @@ public class ServerThread extends BaseServerThread {
         // once receiving the desired client name the object is ready
         onInitializationComplete.accept(this);
     }
+
+else if (msg.startsWith("/create ")) {
+    String roomName = msg.substring(8).trim();
+    if (!roomName.isEmpty()) {
+        Room existing = server.getRoom(roomName);
+        if (existing != null) {
+            sendMessage("Room '" + roomName + "' already exists.");
+        } else {
+            Room newRoom = server.createRoom(roomName);
+            if (currentRoom != null) {
+                currentRoom.removeUser(this);
+            }
+            currentRoom = newRoom;
+            currentRoom.addUser(this);
+            sendMessage("Room '" + roomName + "' created and joined.");
+        }
+    } else {
+        sendMessage("Usage: /create <roomname>");
+    }
+}
+else if (msg.startsWith("/join ")) {
+    String roomName = msg.substring(6).trim();
+    Room targetRoom = server.getRoom(roomName);
+    if (targetRoom != null) {
+        if (currentRoom != null) {
+            currentRoom.removeUser(this);
+        }
+        currentRoom = targetRoom;
+        currentRoom.addUser(this);
+        sendMessage("Joined room '" + roomName + "'.");
+    } else {
+        sendMessage("Room '" + roomName + "' does not exist.");
+    }
+}
+else if (msg.startsWith("/leave")) {
+    if (currentRoom != null && !currentRoom.getName().equals("lobby")) {
+        currentRoom.removeUser(this);
+        currentRoom = server.getRoom("lobby");
+        currentRoom.addUser(this);
+        sendMessage("You have returned to the lobby.");
+    } else {
+        sendMessage("You are already in the lobby.");
+    }
+}
 }

@@ -197,3 +197,14 @@ public enum Server {
     }
 
 }
+
+public Room createRoom(String name) {
+    Room room = new Room(name);
+    rooms.put(name, room);
+    return room;
+}
+
+
+public Room getRoom(String name) {
+    return rooms.get(name);
+}
