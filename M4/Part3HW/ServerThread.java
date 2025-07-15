@@ -50,6 +50,11 @@ public class ServerThread extends Thread {
                                 sendToClient("Server", "Usage: /pm <user> <message>");
                             }
                         }
+                        // part 3 completed with code dvc2 6/23/2025
+                        else if (commandLine.startsWith("shuffle ")) {
+                            String msg = commandLine.substring(8);
+                            server.handleShuffleMessage(username, msg);
+                        }
                     }
                 } else {
                     server.broadcast(username, input);

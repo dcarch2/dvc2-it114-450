@@ -40,6 +40,20 @@ public class Server {
         broadcast("Server", message);
     }
 
+    // part 3 completed with code dvc2 6/23/2025
+    public void handleShuffleMessage(String username, String msg) {
+        List<Character> chars = new ArrayList<>();
+        for (char c : msg.toCharArray()) {
+            chars.add(c);
+        }
+        Collections.shuffle(chars);
+        StringBuilder shuffled = new StringBuilder();
+        for (char c : chars) {
+            shuffled.append(c);
+        }
+        broadcast("Server", "Shuffled from " + username + ": " + shuffled.toString());
+    }
+
     public static void main(String[] args) throws IOException {
         new Server().start(3000);
     }
