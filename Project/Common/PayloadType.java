@@ -10,5 +10,7 @@ public enum PayloadType {
     ROOM_JOIN,
     ROOM_LEAVE,
     REVERSE,
-    MESSAGE // sender and message
+    MESSAGE, // sender and message
+    POINTS, // POINTS added - dvc2 8/4/2025
+    PICK_CHOICE
 }
