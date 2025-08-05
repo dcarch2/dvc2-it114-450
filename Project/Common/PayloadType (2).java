@@ -1,4 +1,4 @@
-package M5.Part5;
+package Project.Common;
 
 public enum PayloadType {
     CLIENT_CONNECT, // client requesting to connect to server (passing of initialization data
@@ -10,7 +10,6 @@ public enum PayloadType {
     ROOM_JOIN,
     ROOM_LEAVE,
     REVERSE,
-    MESSAGE, // sender and message
-    POINTS, // POINTS added - dvc2 8/4/2025
-    PICK_CHOICE
+    MESSAGE, // sender and message,
+    ROOM_LIST, // list of rooms
 }

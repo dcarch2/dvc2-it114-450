@@ -1,9 +1,12 @@
-package M5.Part5;
+package Project.Server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
+import Project.Common.Payload;
+import Project.Common.User;
 
 /**
  * Base class the handles the underlying connection between Client and
