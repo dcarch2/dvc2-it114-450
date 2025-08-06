@@ -18,6 +18,7 @@ import Project.Common.Constants;
 import Project.Common.LoggerUtil;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
+import Project.Common.PointsPayload;
 import Project.Common.RoomAction;
 import Project.Common.RoomResultPayload;
 import Project.Common.TextFX;
@@ -72,8 +73,7 @@ public enum Client {
 
     /**
      * Takes an IP address and a port to attempt a socket connection to a server.
-     * 
-     * @param address
+     * * @param address
      * @param port
      * @return true if connection was successful
      */
@@ -107,8 +107,7 @@ public enum Client {
      * Example format: localhost:3000
      * </p>
      * https://www.w3schools.com/java/java_regex.asp
-     * 
-     * @param text
+     * * @param text
      * @return true if the text is a valid connection command
      */
     private boolean isConnection(String text) {
@@ -122,8 +121,7 @@ public enum Client {
      * <p>
      * Add more here as needed
      * </p>
-     * 
-     * @param text
+     * * @param text
      * @return true if the text was a command or triggered a command
      * @throws IOException
      */
@@ -198,6 +196,13 @@ public enum Client {
 
                 sendRoomAction(text, RoomAction.LIST);
                 wasCommand = true;
+            } else if (text.startsWith(Command.PICK.command)) { // DVC2 - 7/29/2025 - Added to handle game choices
+                text = text.replace(Command.PICK.command, "").trim();
+                sendPick(text);
+                wasCommand = true;
+            } else if (text.startsWith(Command.READY.command)) { // DVC2 - 7/29/2025 - Added to ready up for a game
+                sendReady();
+                wasCommand = true;
             }
         }
         return wasCommand;
@@ -205,10 +210,24 @@ public enum Client {
 
     // Start Send*() methods
 
+    // DVC2 - 7/29/2025 - sends the "ready" command
+    private void sendReady() throws IOException {
+        Payload payload = new Payload();
+        payload.setPayloadType(PayloadType.GAME_START);
+        sendToServer(payload);
+    }
+    
+    // DVC2 - 7/29/2025 - sends a player's choice in a game.
+    private void sendPick(String choice) throws IOException {
+        Payload payload = new Payload();
+        payload.setPayloadType(PayloadType.PICK_CHOICE);
+        payload.setMessage(choice);
+        sendToServer(payload);
+    }
+
     /**
      * Sends a room action to the server
-     * 
-     * @param roomName
+     * * @param roomName
      * @param roomAction (join, leave, create)
      * @throws IOException
      */
@@ -237,8 +256,7 @@ public enum Client {
 
     /**
      * Sends a reverse message action to the server
-     * 
-     * @param message
+     * * @param message
      * @throws IOException
      */
     private void sendReverse(String message) throws IOException {
@@ -251,8 +269,7 @@ public enum Client {
 
     /**
      * Sends a disconnect action to the server
-     * 
-     * @throws IOException
+     * * @throws IOException
      */
     private void sendDisconnect() throws IOException {
         Payload payload = new Payload();
@@ -262,8 +279,7 @@ public enum Client {
 
     /**
      * Sends a message to the server
-     * 
-     * @param message
+     * * @param message
      * @throws IOException
      */
     private void sendMessage(String message) throws IOException {
@@ -275,8 +291,7 @@ public enum Client {
 
     /**
      * Sends the client's name to the server (what the user desires to be called)
-     * 
-     * @param name
+     * * @param name
      * @throws IOException
      */
     private void sendClientName(String name) throws IOException {
@@ -366,6 +381,15 @@ public enum Client {
             case ROOM_LIST:
                 processRoomsList(payload);
                 break;
+            case POINTS: // DVC2 - 7/29/2025 - Added to process point updates.
+                processPointsPayload((PointsPayload) payload);
+                break;
+            case GAME_START: // DVC2 - 7/29/2025 - Added to process game start notifications.
+                // Do nothing on client-side, let the server broadcast a message.
+                break;
+            case PICK_CHOICE: // DVC2 - 7/29/2025 - Added to process player choices.
+                // Do nothing on client-side, handled by server response.
+                break;
             default:
             LoggerUtil.INSTANCE.warning(TextFX.colorize("Unhandled payload type", Color.YELLOW));
                 break;
@@ -374,6 +398,17 @@ public enum Client {
     }
 
     // Start process*() methods
+    // DVC2 - 7/29/2025 - Processes point updates and stores them locally for known clients.
+    private void processPointsPayload(PointsPayload payload) {
+        if (!knownClients.containsKey(payload.getClientId())) {
+            LoggerUtil.INSTANCE.warning(String.format("Received points for unknown client: %s", payload.getClientId()));
+            return;
+        }
+        User client = knownClients.get(payload.getClientId());
+        client.setPoints(payload.getPoints());
+        LoggerUtil.INSTANCE.info(String.format("%s now has %d points.", client.getDisplayName(), client.getPoints()));
+    }
+
     private void processRoomsList(Payload payload) {
         if (!(payload instanceof RoomResultPayload)) {
             error("Invalid payload subclass for processRoomsList");

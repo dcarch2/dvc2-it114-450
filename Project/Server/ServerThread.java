@@ -10,6 +10,7 @@ import Project.Common.Constants;
 import Project.Common.LoggerUtil;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
+import Project.Common.PointsPayload;
 import Project.Common.RoomAction;
 import Project.Common.RoomResultPayload;
 import Project.Common.TextFX;
@@ -23,8 +24,7 @@ public class ServerThread extends BaseServerThread {
     /**
      * A wrapper method so we don't need to keep typing out the long/complex sysout
      * line inside
-     * 
-     * @param message
+     * * @param message
      */
     @Override
     protected void info(String message) {
@@ -34,11 +34,10 @@ public class ServerThread extends BaseServerThread {
 
     /**
      * Wraps the Socket connection and takes a Server reference and a callback
-     * 
-     * @param myClient
+     * * @param myClient
      * @param server
      * @param onInitializationComplete method to inform listener that this object is
-     *                                 ready
+     * ready
      */
     protected ServerThread(Socket myClient, Consumer<ServerThread> onInitializationComplete) {
         Objects.requireNonNull(myClient, "Client socket cannot be null");
@@ -59,6 +58,12 @@ public class ServerThread extends BaseServerThread {
         return sendToClient(rrp);
     }
 
+    // DVC2 - 7/29/2025 - sends the client's new point total
+    protected boolean sendPoints(int points) {
+        PointsPayload payload = new PointsPayload(this.getClientId(), points);
+        return sendToClient(payload);
+    }
+
     protected boolean sendDisconnect(long clientId) {
         Payload payload = new Payload();
         payload.setClientId(clientId);
@@ -72,8 +77,7 @@ public class ServerThread extends BaseServerThread {
 
     /**
      * Syncs Client Info (id, name, join status) to the client
-     * 
-     * @param clientId   use -1 for reset/clear
+     * * @param clientId   use -1 for reset/clear
      * @param clientName
      * @param action     RoomAction of Join or Leave
      * @return true for successful send
@@ -84,12 +88,11 @@ public class ServerThread extends BaseServerThread {
 
     /**
      * Syncs Client Info (id, name, join status) to the client
-     * 
-     * @param clientId   use -1 for reset/clear
+     * * @param clientId   use -1 for reset/clear
      * @param clientName
      * @param action     RoomAction of Join or Leave
      * @param isSync     True is used to not show output on the client side (silent
-     *                   sync)
+     * sync)
      * @return true for successful send
      */
     protected boolean sendClientInfo(long clientId, String clientName, RoomAction action, boolean isSync) {
@@ -115,8 +118,7 @@ public class ServerThread extends BaseServerThread {
     /**
      * Sends this client's id to the client.
      * This will be a successfully connection handshake
-     * 
-     * @return true for successful send
+     * * @return true for successful send
      */
     protected boolean sendClientId() {
         ConnectionPayload payload = new ConnectionPayload();
@@ -129,8 +131,7 @@ public class ServerThread extends BaseServerThread {
 
     /**
      * Sends a message to the client
-     * 
-     * @param clientId who it's from
+     * * @param clientId who it's from
      * @param message
      * @return true for successful send
      */
@@ -171,6 +172,20 @@ public class ServerThread extends BaseServerThread {
                 break;
             case ROOM_LIST:
                 currentRoom.handleListRooms(this, incoming.getMessage());
+                break;
+            case PICK_CHOICE: // DVC2 - 7/29/2025 - Handles player choices for the game
+                if (currentRoom instanceof GameRoom) {
+                    ((GameRoom) currentRoom).handlePick(this, incoming.getMessage());
+                } else {
+                    sendMessage(Constants.DEFAULT_CLIENT_ID, TextFX.colorize("This command is only available in a game room.", Color.RED));
+                }
+                break;
+            case GAME_START: // DVC2 - 7/29/2025 - Handles a client readying up to start the game
+                if (currentRoom instanceof GameRoom) {
+                    ((GameRoom) currentRoom).onSessionStart();
+                } else {
+                    sendMessage(Constants.DEFAULT_CLIENT_ID, TextFX.colorize("This command is only available in a game room.", Color.RED));
+                }
                 break;
             default:
                 LoggerUtil.INSTANCE.warning(TextFX.colorize("Unknown payload type received", Color.RED));
