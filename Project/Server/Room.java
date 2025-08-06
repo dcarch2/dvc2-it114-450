@@ -11,16 +11,19 @@ import Project.Exceptions.DuplicateRoomException;
 import Project.Exceptions.RoomNotFoundException;
 
 public class Room implements AutoCloseable {
-    private final String name;// unique name of the Room
-    private volatile boolean isRunning = false;
-    private final ConcurrentHashMap<Long, ServerThread> clientsInRoom = new ConcurrentHashMap<Long, ServerThread>();
+    protected final String name;// unique name of the Room // DVC2 - 7/29/2025 - Changed to protected for subclasses.
+    protected volatile boolean isRunning = false; // DVC2 - 7/29/2025 - Changed to protected for subclasses.
+    protected final ConcurrentHashMap<Long, ServerThread> clientsInRoom = new ConcurrentHashMap<Long, ServerThread>(); // DVC2 - 7/29/2025 - Changed to protected for subclasses.
 
     public final static String LOBBY = "lobby";
 
-    private void info(String message) {
+    protected void info(String message) { // DVC2 - 7/29/2025 - Changed to protected for subclasses.
         LoggerUtil.INSTANCE.info(TextFX.colorize(String.format("Room[%s]: %s", name, message), Color.PURPLE));
     }
 
+    protected void broadcast(ServerThread sender, String message) {
+        relay(sender, message);
+    }
     public Room(String name) {
         this.name = name;
         isRunning = true;
@@ -109,10 +112,9 @@ public class Room implements AutoCloseable {
      * Adding the synchronized keyword ensures that only one thread can execute
      * these methods at a time,
      * preventing concurrent modification issues and ensuring thread safety
-     * 
-     * @param message
+     * * @param message
      * @param sender  ServerThread (client) sending the message or null if it's a
-     *                server-generated message
+     * server-generated message
      */
     protected synchronized void relay(ServerThread sender, String message) {
         if (!isRunning) { // block action if Room isn't running
@@ -149,10 +151,9 @@ public class Room implements AutoCloseable {
      * Adding the synchronized keyword ensures that only one thread can execute
      * these methods at a time,
      * preventing concurrent modification issues and ensuring thread safety
-     * 
-     * @param client
+     * * @param client
      */
-    private synchronized void disconnect(ServerThread client) {
+    protected synchronized void disconnect(ServerThread client) {
         if (!isRunning) { // block action if Room isn't running
             return;
         }
@@ -252,8 +253,7 @@ public class Room implements AutoCloseable {
 
     /**
      * Expose access to the disconnect action
-     * 
-     * @param serverThread
+     * * @param serverThread
      */
     protected synchronized void handleDisconnect(ServerThread sender) {
         disconnect(sender);

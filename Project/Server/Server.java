@@ -69,6 +69,7 @@ public enum Server {
         // Simplified client connection loop
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             createRoom(Room.LOBBY);// create the first room (lobby)
+            createRoom("rpsgame"); // DVC2 - 7/29/2025 - Creates the game room on server startup
             while (isRunning) {
                 info("Waiting for next client");
                 Socket incomingClient = serverSocket.accept(); // blocking action, waits for a client connection
@@ -93,8 +94,7 @@ public enum Server {
     /**
      * Callback passed to ServerThread to inform Server they're ready to receive
      * data
-     * 
-     * @param serverThread
+     * * @param serverThread
      */
     private void onServerThreadInitialized(ServerThread serverThread) {
         // Generate Server controlled clientId
@@ -114,8 +114,7 @@ public enum Server {
 
     /**
      * Attempts to create a new Room and add it to the tracked rooms collection
-     * 
-     * @param name Unique name of the room
+     * * @param name Unique name of the room
      * @return true if it was created and false if it wasn't
      * @throws DuplicateRoomException
      */
@@ -124,19 +123,24 @@ public enum Server {
         if (rooms.containsKey(nameCheck)) {
             throw new DuplicateRoomException(String.format("Room %s already exists", name));
         }
-        Room room = new Room(name);
+
+        Room room;
+        if (nameCheck.equalsIgnoreCase("rpsgame")) {
+            room = new GameRoom(name);
+        } else {
+            room = new Room(name);
+        }
+        
         rooms.put(nameCheck, room);
         info(String.format("Created new Room %s", name));
     }
 
     /**
      * Attempts to move a client (ServerThread) between rooms
-     * 
-     * @param name   the target room to join
+     * * @param name   the target room to join
      * @param client the client moving
      * @throws RoomNotFoundException
-     * 
-     */
+     * */
     protected void joinRoom(String name, ServerThread client) throws RoomNotFoundException {
         final String nameCheck = name.toLowerCase();
         if (!rooms.containsKey(nameCheck)) {
@@ -153,8 +157,7 @@ public enum Server {
 
     /**
      * Lists all rooms that partially match the given String
-     * 
-     * @param roomQuery
+     * * @param roomQuery
      * @return
      */
     protected List<String> listRooms(String roomQuery) {
@@ -173,18 +176,16 @@ public enum Server {
     }
 
     /**
-     * 
-     * <p>
+     * * <p>
      * Note: Not a common use-case; just updated for example sake.
      * </p>
      * Relays the message from the sender to all rooms
      * Adding the synchronized keyword ensures that only one thread can execute
      * these methods at a time,
      * preventing concurrent modification issues and ensuring thread safety
-     * 
-     * @param message
+     * * @param message
      * @param sender  ServerThread (client) sending the message or null if it's a
-     *                server-generated message
+     * server-generated message
      */
     private synchronized void relayToAllRooms(ServerThread sender, String message) {
         // Note: any desired changes to the message must be done before this line
@@ -205,8 +206,7 @@ public enum Server {
     /**
      * Used to send a message to all Rooms.
      * This is just an example and we likely won't be using this
-     * 
-     * @param sender
+     * * @param sender
      * @param message
      */
     public synchronized void broadcastMessageToAllRooms(ServerThread sender, String message) {
