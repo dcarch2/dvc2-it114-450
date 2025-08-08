@@ -1,5 +1,16 @@
 package Project.Client;
 
+import Project.Client.Interfaces.ICardControls;
+import Project.Client.Interfaces.IConnectionEvents;
+import Project.Client.Interfaces.IMessageEvents;
+import Project.Client.Interfaces.IRoomEvents;
+import Project.Client.Views.ChatGamePanel;
+import Project.Client.Views.ConnectionPanel;
+import Project.Client.Views.Menu;
+import Project.Client.Views.RoomsPanel;
+import Project.Client.Views.UserDetailsPanel;
+import Project.Common.Constants;
+import Project.Common.LoggerUtil;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -17,18 +28,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import Project.Client.Interfaces.ICardControls;
-import Project.Client.Interfaces.IConnectionEvents;
-import Project.Client.Interfaces.IMessageEvents;
-import Project.Client.Interfaces.IRoomEvents;
-import Project.Client.Views.ChatGamePanel;
-import Project.Client.Views.ConnectionPanel;
-import Project.Client.Views.Menu;
-import Project.Client.Views.RoomsPanel;
-import Project.Client.Views.UserDetailsPanel;
-import Project.Common.Constants;
-import Project.Common.LoggerUtil;
 
 /**
  * ClientUI is the main application window that manages different screens and
@@ -181,7 +180,7 @@ public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvent
 
             try {
 
-                new ClientUI("MT85-Client");
+                new ClientUI("DVC2-Client");
 
             } catch (Throwable t) {
                 LoggerUtil.INSTANCE.severe("Unhandled exception in main thread", t);
