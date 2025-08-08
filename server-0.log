@@ -310,3 +310,37 @@
 > [0;36mThread[1]: Received from my client: Payload[GAME_START] Client Id [0] Message: [null][0m
 08/06/2025 00:02:46 [Project.Server.ServerThread] ([32mINFO[0m):
 > [0;36mThread[1]: Sending to client: Payload[MESSAGE] Client Id [-1] Message: [[0;31mThis command is only available in a game room.[0m][0m
+08/07/2025 23:01:28 [Project.Server.Server] ([32mINFO[0m):
+> Server Starting
+08/07/2025 23:01:29 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Listening on port 3000[0m
+08/07/2025 23:01:29 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[lobby]: Created[0m
+08/07/2025 23:01:29 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Created new Room lobby[0m
+08/07/2025 23:01:29 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[rpsgame]: Created[0m
+08/07/2025 23:01:29 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[rpsgame]: GameRoom created[0m
+08/07/2025 23:01:29 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Created new Room rpsgame[0m
+08/07/2025 23:01:29 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Waiting for next client[0m
+08/07/2025 23:08:16 [Project.Server.Server] ([32mINFO[0m):
+> Server Starting
+08/07/2025 23:08:16 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Listening on port 3000[0m
+08/07/2025 23:08:16 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[lobby]: Created[0m
+08/07/2025 23:08:16 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Created new Room lobby[0m
+08/07/2025 23:08:16 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[rpsgame]: Created[0m
+08/07/2025 23:08:16 [Project.Server.Room] ([32mINFO[0m):
+> [0;35mRoom[rpsgame]: GameRoom created[0m
+08/07/2025 23:08:16 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Created new Room rpsgame[0m
+08/07/2025 23:08:16 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: Waiting for next client[0m
+08/08/2025 00:12:52 [Project.Server.Server] ([32mINFO[0m):
+> [0;33mServer: JVM is shutting down. Perform cleanup tasks.[0m
