@@ -1,95 +1,47 @@
 package Project.Common;
 
-public class User {
+import java.io.Serializable;
+
+/**
+ * DVC2 - 8/6/2025 - Added `isAway` and `isSpectator` fields to the User class for Milestone 3.
+ */
+public class User implements Serializable {
     private long clientId = Constants.DEFAULT_CLIENT_ID;
     private String clientName;
-    private boolean isReady = false;
-    private boolean tookTurn = false;
-    private int points = 0;
+    private int points;
+    private boolean eliminated;
+    private boolean isAway = false; // DVC2 - 8/6/2025 - Added to support away status
+    private boolean isSpectator = false; // DVC2 - 8/6/2025 - Added to support spectator status
 
-    /**
-     * @return the points
-     */
-    public int getPoints() {
-        return points;
+    // existing getters and setters...
+    
+    // DVC2 - 8/6/2025 - New getters and setters for the new fields.
+    public boolean isAway() {
+        return isAway;
     }
 
-    /**
-     * @param points the points to apply (positive or negative)
-     * 
-     */
-    public void changePoints(int points) {
-        this.points += points;
-        if (this.points < 0) {
-            this.points = 0;
-        }
+    public void setAway(boolean isAway) {
+        this.isAway = isAway;
+    }
+    
+    public boolean isSpectator() {
+        return isSpectator;
     }
 
-    /**
-     * @param points the points to set
-     */
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    /**
-     * @return the clientId
-     */
-    public long getClientId() {
-        return clientId;
-    }
-
-    /**
-     * @param clientId the clientId to set
-     */
-    public void setClientId(long clientId) {
-        this.clientId = clientId;
-    }
-
-    /**
-     * @return the username
-     */
-    public String getClientName() {
-        return clientName;
-    }
-
-    /**
-     * @param username the username to set
-     */
-    public void setClientName(String username) {
-        this.clientName = username;
+    public void setSpectator(boolean isSpectator) {
+        this.isSpectator = isSpectator;
     }
 
     public String getDisplayName() {
         return String.format("%s#%s", this.clientName, this.clientId);
     }
 
-    public boolean isReady() {
-        return isReady;
-    }
-
-    public void setReady(boolean isReady) {
-        this.isReady = isReady;
-    }
-
     public void reset() {
         this.clientId = Constants.DEFAULT_CLIENT_ID;
         this.clientName = null;
-        this.isReady = false;
-        this.tookTurn = false;
-    }
-
-    /**
-     * @return the tookTurn
-     */
-    public boolean didTakeTurn() {
-        return tookTurn;
-    }
-
-    /**
-     * @param tookTurn the tookTurn to set
-     */
-    public void setTookTurn(boolean tookTurn) {
-        this.tookTurn = tookTurn;
+        this.points = 0;
+        this.eliminated = false;
+        this.isAway = false;
+        this.isSpectator = false;
     }
 }
