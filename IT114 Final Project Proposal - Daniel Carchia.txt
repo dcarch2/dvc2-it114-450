@@ -1,0 +1,17 @@
+## Project Name: Rock Paper Scissors
+### Project Summary: Group RPS (2+ players). Battles are compared clockwise (A -> B, B -> C, C -> A), you determine if elimination occurs during attack (ex. A -> B) or defense (ex. C -> A). Points will be tracked for wins, but session ends with “last person standing”.
+### Github Link: https://github.com/dcarch2/dvc2-it114-450
+### Your Name: Daniel Carchia
+### Course/Section: SU25-IT114450
+ 
+ 
+### Proposal Checklist and Evidence
+
+- Milestone 1
+https://github.com/dcarch2/dvc2-it114-450/blob/Milestone1/dvc2_IT114-450-M2025_it114-milestone-1_07-14-2025_23-12-33.pdf 
+- Milestone 2
+https://github.com/dcarch2/dvc2-it114-450/blob/Milestone2/dvc2_IT114-450-M2025_it114-milestone-2-rps_08-05-2025_20-27-39.pdf
+- Milestone 3
+https://github.com/dcarch2/dvc2-it114-450/blob/Milestone3/dvc2_IT114-450-M2025_it114-milestone-3-rps_08-08-2025_04-43-39.pdf
+- Demo Link
+https://youtu.be/nH8jpG-YXC8
