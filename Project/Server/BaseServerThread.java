@@ -6,9 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import Project.Common.Payload;
+import Project.Common.PayloadType;
 import Project.Common.User;
-import Project.Exceptions.DuplicateRoomException;
-import Project.Exceptions.RoomNotFoundException;
 
 /**
  * Base class the handles the underlying connection between Client and
@@ -16,23 +15,16 @@ import Project.Exceptions.RoomNotFoundException;
  */
 public abstract class BaseServerThread extends Thread {
 
-    protected volatile boolean isRunning = false; // control variable to stop this thread
+    protected boolean isRunning = false; // control variable to stop this thread
     protected ObjectOutputStream out; // exposed here for send()
     protected Socket client; // communication directly to "my" client
-    protected User user = new User(); // DVC2 - 7/29/2025 - Changed to protected to allow access by subclasses.
+    protected User user = new User();
     protected Room currentRoom;
 
     /**
-     * DVC2 - 7/29/2025 - Returns the User object associated with this ServerThread
-     * * @return User
-     */
-    public User getUser() {
-        return this.user;
-    }
-
-    /**
      * Returns the current Room associated with this ServerThread
-     * * @return
+     * 
+     * @return
      */
     protected Room getCurrentRoom() {
         return this.currentRoom;
@@ -40,7 +32,8 @@ public abstract class BaseServerThread extends Thread {
 
     /**
      * Allows the setting of a non-null Room reference to this ServerThread
-     * * @param room
+     * 
+     * @param room
      */
     protected void setCurrentRoom(Room room) {
         if (room == null) {
@@ -55,7 +48,8 @@ public abstract class BaseServerThread extends Thread {
 
     /**
      * Returns the status of this ServerThread
-     * * @return
+     * 
+     * @return
      */
     public boolean isRunning() {
         return isRunning;
@@ -73,7 +67,8 @@ public abstract class BaseServerThread extends Thread {
 
     /**
      * Sets the client name and triggers onInitialized()
-     * * @param clientName
+     * 
+     * @param clientName
      */
     protected void setClientName(String clientName) {
         this.user.setClientName(clientName);
@@ -91,7 +86,8 @@ public abstract class BaseServerThread extends Thread {
     /**
      * A wrapper method so we don't need to keep typing out the long/complex sysout
      * line inside
-     * * @param message
+     * 
+     * @param message
      */
     protected abstract void info(String message);
 
@@ -102,13 +98,15 @@ public abstract class BaseServerThread extends Thread {
 
     /**
      * Receives a Payload and passes data to proper handler
-     * * @param payload
+     * 
+     * @param payload
      */
     protected abstract void processPayload(Payload payload);
 
     /**
      * Sends the payload over the socket
-     * * @param payload
+     * 
+     * @param payload
      * @return true if no errors were encountered
      */
     protected boolean sendToClient(Payload payload) {
@@ -116,7 +114,12 @@ public abstract class BaseServerThread extends Thread {
             return true;
         }
         try {
-            info("Sending to client: " + payload);
+            // added to reduce log spam
+            boolean ignoreTimePayloads = true;
+            if (!(ignoreTimePayloads && payload.getPayloadType() == PayloadType.TIME)) {
+                info("Sending to client: " + payload);
+            }
+
             out.writeObject(payload);
             out.flush();
             return true;

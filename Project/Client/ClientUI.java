@@ -1,145 +1,285 @@
 package Project.Client;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.util.List;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import Project.Client.Interfaces.ICardControls;
+import Project.Client.Interfaces.IConnectionEvents;
+import Project.Client.Interfaces.IMessageEvents;
+import Project.Client.Interfaces.IRoomEvents;
+import Project.Client.Views.ChatGamePanel;
+import Project.Client.Views.ConnectionPanel;
+import Project.Client.Views.Menu;
+import Project.Client.Views.RoomsPanel;
+import Project.Client.Views.UserDetailsPanel;
 import Project.Common.Constants;
+import Project.Common.LoggerUtil;
 
 /**
- * DVC2 - 8/07/2025 - This class implements the graphical user interface for the client, including panels for connection,
- * ready checks, and the main game area.
+ * ClientUI is the main application window that manages different screens and
+ * handles client events.
  */
-public class ClientUI extends JFrame {
+public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvents, IRoomEvents, ICardControls {
+    private CardLayout card = new CardLayout(); // Layout manager to switch between different screens
+    private Container container; // Container to hold different panels
+    private JPanel cardContainer;
+    private String originalTitle;
+    private JPanel currentCardPanel;
+    private CardView currentCard = CardView.CONNECT;
+    private JMenuBar menu;
+    private ConnectionPanel connectionPanel;
+    private UserDetailsPanel userDetailsPanel;
+    private ChatGamePanel chatGamePanel;
+    private RoomsPanel roomsPanel;
+    private JLabel roomLabel = new JLabel();
 
-    private CardLayout cardLayout;
-    private JPanel mainPanel;
+    {
+        // Note: Moved from Client as this file is the entry point now
+        // statically initialize the client-side LoggerUtil
+        LoggerUtil.LoggerConfig config = new LoggerUtil.LoggerConfig();
+        config.setFileSizeLimit(2048 * 1024); // 2MB
+        config.setFileCount(1);
+        config.setLogLocation("client-ui.log");
+        // Set the logger configuration
+        LoggerUtil.INSTANCE.setConfig(config);
+    }
 
-    private JTextField usernameField;
-    private JTextField hostField;
-    private JTextField portField;
+    /**
+     * Constructor to create the main application window.
+     * 
+     * @param title The title of the window.
+     */
+    public ClientUI(String title) {
+        super(title); // Call the parent's constructor to set the frame title
+        originalTitle = title;
+        container = getContentPane();
+        cardContainer = new JPanel();
+        cardContainer.setLayout(card);
+        container.add(roomLabel, BorderLayout.NORTH);
+        container.add(cardContainer, BorderLayout.CENTER);
+        cardContainer.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                cardContainer.setPreferredSize(e.getComponent().getSize());
+                cardContainer.revalidate();
+                cardContainer.repaint();
+            }
 
-    private JButton readyButton;
-    private JButton rockButton;
-    private JButton paperButton;
-    private JButton scissorsButton;
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                // No specific action on move
+            }
+        });
 
-    private JTextArea gameEventArea;
-    private JList<String> userList;
-    private DefaultListModel<String> userListModel;
-    
-    public ClientUI() {
-        setTitle("Rock Paper Scissors Client");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        cardLayout = new CardLayout();
-        mainPanel = new JPanel(cardLayout);
+        setMinimumSize(new Dimension(400, 400));
+        setSize(getMinimumSize());
+        setLocationRelativeTo(null); // Center the window
+        menu = new Menu(this);
+        this.setJMenuBar(menu);
 
         // Initialize panels
-        setupConnectPanel();
-        setupReadyCheckPanel();
-        setupGamePanel();
+        connectionPanel = new ConnectionPanel(this);
+        userDetailsPanel = new UserDetailsPanel(this);
+        chatGamePanel = new ChatGamePanel(this);
+        roomsPanel = new RoomsPanel(this);
 
-        add(mainPanel);
-        setVisible(true);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                int response = JOptionPane.showConfirmDialog(cardContainer,
+                        "Are you sure you want to close this window?", "Close Window?",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (response == JOptionPane.YES_OPTION) {
+                    try {
+                        Client.INSTANCE.sendDisconnect();
+                    } catch (NullPointerException | IOException e) {
+                        LoggerUtil.INSTANCE.severe("Error during disconnect: " + e.getMessage());
+                    }
+                    System.exit(0);
+                }
+            }
+        });
 
-        // Show the connection panel first
-        cardLayout.show(mainPanel, "ConnectPanel");
+        pack(); // Resize to fit components
+        setVisible(true); // Show the window
     }
 
-    private void setupConnectPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // Components for the Connect Panel
-        usernameField = new JTextField(15);
-        hostField = new JTextField(15);
-        portField = new JTextField(15);
-        JButton connectButton = new JButton("Connect");
-
-        gbc.gridx = 0; gbc.gridy = 0; panel.add(new JLabel("Username:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; panel.add(usernameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; panel.add(new JLabel("Host:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; panel.add(hostField, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 2; panel.add(new JLabel("Port:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; panel.add(portField, gbc);
-        
-        gbc.gridx = 1; gbc.gridy = 3; panel.add(connectButton, gbc);
-
-        connectButton.addActionListener(e -> {
-            // TODO: Implement connection logic here
-            // String username = usernameField.getText();
-            // String host = hostField.getText();
-            // int port = Integer.parseInt(portField.getText());
-            // Connect to server and then switch panels
-            cardLayout.show(mainPanel, "ReadyCheckPanel");
-        });
-
-        mainPanel.add(panel, "ConnectPanel");
+    /**
+     * Finds the current visible panel and updates the current card state.
+     */
+    private void findAndSetCurrentPanel() {
+        for (Component c : cardContainer.getComponents()) {
+            if (c.isVisible()) {
+                currentCardPanel = (JPanel) c;
+                currentCard = Enum.valueOf(CardView.class, currentCardPanel.getName());
+                // Ensure connection for specific views
+                if (Client.INSTANCE.getMyClientId() == Constants.DEFAULT_CLIENT_ID
+                        && currentCard.ordinal() >= CardView.CHAT.ordinal()) {
+                    show(CardView.CONNECT.name());
+                    setSize(getMinimumSize());
+                    revalidate();
+                }
+                break;
+            }
+        }
+        LoggerUtil.INSTANCE.fine("Current panel: " + currentCardPanel.getName());
     }
 
-    private void setupReadyCheckPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel readyStatusLabel = new JLabel("Click 'Ready' to start a new game session.", SwingConstants.CENTER);
-        readyButton = new JButton("Ready");
-
-        panel.add(readyStatusLabel, BorderLayout.CENTER);
-        panel.add(readyButton, BorderLayout.SOUTH);
-        
-        readyButton.addActionListener(e -> {
-            // TODO: Send /ready command to server
-            // After ready check is complete (server confirms), switch to game panel
-            cardLayout.show(mainPanel, "GamePanel");
-        });
-
-        mainPanel.add(panel, "ReadyCheckPanel");
+    @Override
+    public void next() {
+        card.next(cardContainer);
+        findAndSetCurrentPanel();
     }
 
-    private void setupGamePanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-
-        // Top section for game events
-        gameEventArea = new JTextArea(10, 30);
-        gameEventArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(gameEventArea);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        // Right side for user list
-        userListModel = new DefaultListModel<>();
-        userList = new JList<>(userListModel);
-        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane userScrollPane = new JScrollPane(userList);
-        userScrollPane.setPreferredSize(new Dimension(200, 0));
-        panel.add(userScrollPane, BorderLayout.EAST);
-        
-        // Bottom section for game controls
-        JPanel controlsPanel = new JPanel();
-        rockButton = new JButton("Rock");
-        paperButton = new JButton("Paper");
-        scissorsButton = new JButton("Scissors");
-        controlsPanel.add(rockButton);
-        controlsPanel.add(paperButton);
-        controlsPanel.add(scissorsButton);
-        panel.add(controlsPanel, BorderLayout.SOUTH);
-
-        rockButton.addActionListener(e -> {
-            // TODO: Send /pick r command to server
-        });
-        paperButton.addActionListener(e -> {
-            // TODO: Send /pick p command to server
-        });
-        scissorsButton.addActionListener(e -> {
-            // TODO: Send /pick s command to server
-        });
-
-        mainPanel.add(panel, "GamePanel");
+    @Override
+    public void previous() {
+        card.previous(cardContainer);
+        findAndSetCurrentPanel();
     }
-    
+
+    @Override
+    public void show(String cardName) {
+        card.show(cardContainer, cardName);
+        findAndSetCurrentPanel();
+    }
+
+    @Override
+    public void addPanel(String cardName, JPanel panel) {
+        cardContainer.add(panel, cardName);
+    }
+
+    @Override
+    public void connect() {
+        String username = userDetailsPanel.getUsername();
+        String host = connectionPanel.getHost();
+        int port = connectionPanel.getPort();
+        setTitle(originalTitle + " - " + username);
+        Client.INSTANCE.connect(host, port, username, this);
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(ClientUI::new);
+        // TODO update with your UCID instead of mine
+        // Your test or app entry point
+
+        SwingUtilities.invokeLater(() -> {
+
+            try {
+
+                new ClientUI("MT85-Client");
+
+            } catch (Throwable t) {
+                LoggerUtil.INSTANCE.severe("Unhandled exception in main thread", t);
+            }
+        });
+
     }
+
+    // Interface methods start
+
+    @Override
+    public void onClientDisconnect(long clientId) {
+        if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
+            chatGamePanel.getChatPanel().removeUserListItem(clientId);
+            boolean isMe = clientId == Client.INSTANCE.getMyClientId();
+            String message = String.format("*%s disconnected*",
+                    isMe ? "You" : Client.INSTANCE.getDisplayNameFromId(clientId));
+            chatGamePanel.getChatPanel().addText(message);
+            if (isMe) {
+                LoggerUtil.INSTANCE.info("I disconnected");
+                roomLabel.setText(""); // reset label
+                previous();
+            }
+        }
+    }
+
+    @Override
+    public void onMessageReceive(long clientId, String message) {
+        if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
+
+            if (clientId < Constants.DEFAULT_CLIENT_ID) {
+                // Note: Planning to use < -1 as internal channels (see GameEventsPanel)
+                return;
+            }
+            String displayName = Client.INSTANCE.getDisplayNameFromId(clientId);
+            // added color to differentiate between room and user messages
+            String name = clientId == Constants.DEFAULT_CLIENT_ID ? "<font color=blue>Room</font>"
+                    : String.format("<font color=purple>%s</font>", displayName);
+
+            chatGamePanel.getChatPanel().addText(String.format("%s: %s", name, message));
+        }
+    }
+
+    @Override
+    public void onReceiveClientId(long id) {
+        LoggerUtil.INSTANCE.fine("Received client id: " + id);
+        show(CardView.CHAT_GAME_SCREEN.name());
+        chatGamePanel.getChatPanel().addText("*You connected*");
+        setSize(new Dimension(600, 600));
+        revalidate();
+    }
+
+    @Override
+    public void onResetUserList() {
+        chatGamePanel.getChatPanel().clearUserList();
+    }
+
+    @Override
+    public void onReceiveRoomList(List<String> rooms, String message) {
+        roomsPanel.removeAllRooms();
+        if (message != null && !message.isEmpty()) {
+            roomsPanel.setMessage(message);
+        }
+        if (rooms != null) {
+            for (String room : rooms) {
+                roomsPanel.addRoom(room);
+            }
+        }
+    }
+
+    @Override
+    public void onRoomAction(long clientId, String roomName, boolean isJoin, boolean isQuiet) {
+        LoggerUtil.INSTANCE.info("Current card: " + currentCard.name());
+        if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
+            // handle reset
+            if (clientId == Constants.DEFAULT_CLIENT_ID) {
+                chatGamePanel.getChatPanel().clearUserList();
+                return;
+            }
+            String displayName = Client.INSTANCE.getDisplayNameFromId(clientId);
+            if (isJoin) {
+                roomLabel.setText("Room: " + roomName);
+                chatGamePanel.getChatPanel().addUserListItem(clientId, displayName);
+            } else {
+                chatGamePanel.getChatPanel().removeUserListItem(clientId);
+            }
+            // generate message if not quiet sync
+            if (!isQuiet) {
+                boolean isMe = clientId == Client.INSTANCE.getMyClientId();
+                String message = String.format("*%s %s the Room %s*",
+                        /* 1st %s */ isMe ? "You" : displayName,
+                        /* 2nd %s */ isJoin ? "joined" : "left",
+                        /* 3rd %s */ roomName == null ? "" : roomName); // added handling of null after the demo video
+                chatGamePanel.getChatPanel().addText(message);
+            }
+        }
+
+    }
+
+    // Interface methods end
 }

@@ -1,15 +1,36 @@
 package Project.Common;
 
-import java.io.Serializable;
-
-/**
- * DVC2 - 7/29/2025 - Added points and eliminated status to track game progress for a client.
- */
-public class User implements Serializable {
+public class User {
     private long clientId = Constants.DEFAULT_CLIENT_ID;
     private String clientName;
-    private int points;
-    private boolean eliminated;
+    private boolean isReady = false;
+    private boolean tookTurn = false;
+    private int points = 0;
+
+    /**
+     * @return the points
+     */
+    public int getPoints() {
+        return points;
+    }
+
+    /**
+     * @param points the points to apply (positive or negative)
+     * 
+     */
+    public void changePoints(int points) {
+        this.points += points;
+        if (this.points < 0) {
+            this.points = 0;
+        }
+    }
+
+    /**
+     * @param points the points to set
+     */
+    public void setPoints(int points) {
+        this.points = points;
+    }
 
     /**
      * @return the clientId
@@ -39,42 +60,36 @@ public class User implements Serializable {
         this.clientName = username;
     }
 
-    /**
-     * @return the points
-     */
-    public int getPoints() {
-        return points;
-    }
-
-    /**
-     * @param points the points to set
-     */
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    /**
-     * @return the eliminated status
-     */
-    public boolean isEliminated() {
-        return eliminated;
-    }
-
-    /**
-     * @param eliminated the elimination status to set
-     */
-    public void setEliminated(boolean eliminated) {
-        this.eliminated = eliminated;
-    }
-
     public String getDisplayName() {
         return String.format("%s#%s", this.clientName, this.clientId);
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void setReady(boolean isReady) {
+        this.isReady = isReady;
     }
 
     public void reset() {
         this.clientId = Constants.DEFAULT_CLIENT_ID;
         this.clientName = null;
-        this.points = 0;
-        this.eliminated = false;
+        this.isReady = false;
+        this.tookTurn = false;
+    }
+
+    /**
+     * @return the tookTurn
+     */
+    public boolean didTakeTurn() {
+        return tookTurn;
+    }
+
+    /**
+     * @param tookTurn the tookTurn to set
+     */
+    public void setTookTurn(boolean tookTurn) {
+        this.tookTurn = tookTurn;
     }
 }

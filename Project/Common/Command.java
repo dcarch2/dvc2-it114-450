@@ -1,9 +1,8 @@
 package Project.Common;
 
-import java.io.Serializable;
 import java.util.HashMap;
 
-public enum Command implements Serializable {
+public enum Command {
     QUIT("quit"),
     DISCONNECT("disconnect"),
     LOGOUT("logout"),
@@ -15,8 +14,9 @@ public enum Command implements Serializable {
     NAME("name"),
     LIST_USERS("users"),
     LIST_ROOMS("listrooms"),
-    PICK("pick"), // DVC2 - 7/29/2025 - Command for picking a move in the Rock Paper Scissors game.
-    READY("ready"); // DVC2 - 7/29/2025 - Command to ready up for a new game session.
+    READY("ready"),
+    DO_SOMETHING("something"),
+    USE("use"),;
 
     private static final HashMap<String, Command> BY_COMMAND = new HashMap<>();
     static {

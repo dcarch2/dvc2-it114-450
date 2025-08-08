@@ -8,9 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import Project.Common.LoggerUtil;
-
-import Project.Common.TextFX.Color;
 import Project.Common.TextFX;
+import Project.Common.TextFX.Color;
 import Project.Exceptions.DuplicateRoomException;
 import Project.Exceptions.RoomNotFoundException;
 
@@ -69,7 +68,6 @@ public enum Server {
         // Simplified client connection loop
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             createRoom(Room.LOBBY);// create the first room (lobby)
-            createRoom("rpsgame"); // DVC2 - 7/29/2025 - Creates the game room on server startup
             while (isRunning) {
                 info("Waiting for next client");
                 Socket incomingClient = serverSocket.accept(); // blocking action, waits for a client connection
@@ -85,7 +83,8 @@ public enum Server {
         } catch (DuplicateRoomException e) {
             LoggerUtil.INSTANCE.severe(TextFX.colorize("Lobby already exists (this shouldn't happen)", Color.RED));
         } catch (IOException e) {
-            LoggerUtil.INSTANCE.severe(TextFX.colorize("Error accepting connection", Color.RED), e);
+            LoggerUtil.INSTANCE.severe(TextFX.colorize("Error accepting connection", Color.RED));
+            e.printStackTrace();
         } finally {
             info("Closing server socket");
         }
@@ -94,9 +93,10 @@ public enum Server {
     /**
      * Callback passed to ServerThread to inform Server they're ready to receive
      * data
-     * * @param serverThread
+     * 
+     * @param serverThread
      */
-    private void onServerThreadInitialized(ServerThread serverThread) {
+    private synchronized void onServerThreadInitialized(ServerThread serverThread) {
         // Generate Server controlled clientId
         nextClientId = Math.max(++nextClientId, 1);
         serverThread.setClientId(nextClientId);
@@ -114,33 +114,32 @@ public enum Server {
 
     /**
      * Attempts to create a new Room and add it to the tracked rooms collection
-     * * @param name Unique name of the room
+     * 
+     * @param name Unique name of the room
      * @return true if it was created and false if it wasn't
      * @throws DuplicateRoomException
      */
     protected void createRoom(String name) throws DuplicateRoomException {
         final String nameCheck = name.toLowerCase();
+        if (nameCheck.length() == 0) {
+            throw new IllegalArgumentException("Room name cannot be empty");
+        }
         if (rooms.containsKey(nameCheck)) {
             throw new DuplicateRoomException(String.format("Room %s already exists", name));
         }
-
-        Room room;
-        if (nameCheck.equalsIgnoreCase("rpsgame")) {
-            room = new GameRoom(name);
-        } else {
-            room = new Room(name);
-        }
-        
+        Room room = Room.LOBBY.equalsIgnoreCase(nameCheck) ? new Room(name) : new GameRoom(name);
         rooms.put(nameCheck, room);
         info(String.format("Created new Room %s", name));
     }
 
     /**
      * Attempts to move a client (ServerThread) between rooms
-     * * @param name   the target room to join
+     * 
+     * @param name   the target room to join
      * @param client the client moving
      * @throws RoomNotFoundException
-     * */
+     * 
+     */
     protected void joinRoom(String name, ServerThread client) throws RoomNotFoundException {
         final String nameCheck = name.toLowerCase();
         if (!rooms.containsKey(nameCheck)) {
@@ -155,18 +154,11 @@ public enum Server {
         next.addClient(client);
     }
 
-    /**
-     * Lists all rooms that partially match the given String
-     * * @param roomQuery
-     * @return
-     */
     protected List<String> listRooms(String roomQuery) {
         final String nameCheck = roomQuery.toLowerCase();
         return rooms.values().stream()
                 .filter(room -> room.getName().toLowerCase().contains(nameCheck))// find partially matched rooms
                 .map(room -> room.getName())// map room to String (name)
-                .limit(10) // limit to 10 results
-                .sorted() // sort the results alphabetically
                 .collect(Collectors.toList()); // return a mutable list
     }
 
@@ -176,16 +168,18 @@ public enum Server {
     }
 
     /**
-     * * <p>
+     * 
+     * <p>
      * Note: Not a common use-case; just updated for example sake.
      * </p>
      * Relays the message from the sender to all rooms
      * Adding the synchronized keyword ensures that only one thread can execute
      * these methods at a time,
      * preventing concurrent modification issues and ensuring thread safety
-     * * @param message
+     * 
+     * @param message
      * @param sender  ServerThread (client) sending the message or null if it's a
-     * server-generated message
+     *                server-generated message
      */
     private synchronized void relayToAllRooms(ServerThread sender, String message) {
         // Note: any desired changes to the message must be done before this line
@@ -206,7 +200,8 @@ public enum Server {
     /**
      * Used to send a message to all Rooms.
      * This is just an example and we likely won't be using this
-     * * @param sender
+     * 
+     * @param sender
      * @param message
      */
     public synchronized void broadcastMessageToAllRooms(ServerThread sender, String message) {
