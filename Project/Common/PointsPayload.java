@@ -1,26 +1,28 @@
 package Project.Common;
 
-import java.io.Serializable;
-
-public class PointsPayload extends Payload implements Serializable {
+public class PointsPayload extends Payload {
     private int points;
 
-    public PointsPayload(long clientId, int points) {
-        this.setPayloadType(PayloadType.POINTS);
-        this.setClientId(clientId);
-        this.setPoints(points);
+    public PointsPayload() {
+        setPayloadType(PayloadType.POINTS);
     }
 
+    /**
+     * @return the points
+     */
     public int getPoints() {
-        return this.points;
+        return points;
     }
 
+    /**
+     * @param points the points to set
+     */
     public void setPoints(int points) {
         this.points = points;
     }
 
     @Override
     public String toString() {
-        return super.toString() + String.format(" Points: [%s]", this.getPoints());
+        return super.toString() + String.format(" points=%d", points);
     }
 }
